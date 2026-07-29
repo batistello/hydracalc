@@ -45,6 +45,13 @@ export const COLUNAS_NO = [
   { field: 'nResidencias', label: 'Nº Residências', tipo: 'number', padrao: 0 }
 ];
 
+export const COLUNAS_ACESSORIO = [
+  { field: 'item', label: 'Acessório', tipo: 'text', padrao: 'União PEAD' },
+  { field: 'diametro', label: 'Diâmetro', tipo: 'text', padrao: '25mm' },
+  { field: 'qtd', label: 'Quantidade', tipo: 'number', padrao: 1 },
+  { field: 'unidade', label: 'Unid.', tipo: 'text', padrao: 'un.' }
+];
+
 function celulaPorTipo(col) {
   switch (col.tipo) {
     case 'material': return celulaMaterial(col.padrao);

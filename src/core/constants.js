@@ -6,14 +6,18 @@
 // assinar um memorial técnico com estes parâmetros.
 // ============================================================================
 
-// Coeficiente de rugosidade de Hazen-Williams (C).
-// Valores típicos para tubo novo; tendem a cair com o tempo de uso (incrustação).
+// Coeficiente de rugosidade de Hazen-Williams (C) e coeficiente "k" de
+// Azevedo Netto (fórmula de Allievi) por material — valores da literatura
+// técnica brasileira de hidráulica, os mesmos usados de forma consolidada
+// em memoriais de saneamento (conferidos contra referência de campo).
 export const MATERIAIS = [
-  { id: 'PEAD', nome: 'PEAD (Polietileno)', C: 150, E_kgf_cm2: 9000 },
-  { id: 'PVC', nome: 'PVC rígido', C: 140, E_kgf_cm2: 30000 },
-  { id: 'FoFo', nome: 'Ferro Fundido', C: 130, E_kgf_cm2: 1000000 },
-  { id: 'ACO', nome: 'Aço Carbono', C: 120, E_kgf_cm2: 2100000 },
-  { id: 'CA', nome: 'Concreto Armado', C: 130, E_kgf_cm2: 300000 }
+  { id: 'PEAD', nome: 'PEAD (Polietileno)', C: 150, kAllievi: 18 },
+  { id: 'PVC', nome: 'PVC rígido', C: 140, kAllievi: 18 },
+  { id: 'FoFo', nome: 'Ferro Fundido', C: 130, kAllievi: 1.0 },
+  { id: 'ACO', nome: 'Aço Carbono', C: 120, kAllievi: 0.5 },
+  { id: 'ACO_GALV', nome: 'Aço Galvanizado', C: 110, kAllievi: 0.5 },
+  { id: 'CA', nome: 'Concreto Armado', C: 130, kAllievi: 5.0 },
+  { id: 'CIM_AMIANTO', nome: 'Cimento-Amianto', C: 130, kAllievi: 4.4 }
 ];
 
 export function getMaterial(id) {
@@ -58,3 +62,10 @@ export const PERC_PERDAS_LOCALIZADAS_PADRAO = 10;
 // PN é dado em bar; 1 bar ≈ 10,197 mca. Aplicamos também um fator de
 // segurança/serviço (padrão 1,0 = sem margem extra) editável pelo usuário.
 export const BAR_PARA_MCA = 10.197;
+
+// Ligação domiciliar: comprimento padrão de tubo por economia/residência
+// conectada à rede (do ramal até o cavalete), conforme prática usual.
+export const LIGACAO_COMPRIMENTO_PADRAO_M = 6;
+export const LIGACAO_DIAMETRO_PADRAO_MM = 25;
+export const LIGACAO_MATERIAL_PADRAO = 'PEAD';
+export const LIGACAO_PN_PADRAO = 10;

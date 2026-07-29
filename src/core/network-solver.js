@@ -45,6 +45,8 @@ export function resolverRede({ nodes, links, idReservatorio, nivelReservatorio, 
     resolverVazao(idReservatorio, new Set());
   }
 
+  const cotaReservatorio = nodes[idReservatorio]?.cota ?? null;
+
   // 2) Perda de carga, velocidade e propagação de cota piezométrica (BFS a partir do reservatório)
   if (nodes[idReservatorio]) {
     nodes[idReservatorio].h = nodes[idReservatorio].cota + nivelReservatorio;
@@ -53,6 +55,7 @@ export function resolverRede({ nodes, links, idReservatorio, nivelReservatorio, 
       const u = fila.shift();
       links.filter(l => l.m === u).forEach(l => {
         const diM = diametroInterno_m(l.deMm, l.espMm);
+        l.diCalculado = diM;
 
         if (l.q_fic > 0) {
           l.v = velocidade_ms(l.q_mon, diM);
@@ -62,17 +65,24 @@ export function resolverRede({ nodes, links, idReservatorio, nivelReservatorio, 
           l.hfLocalizada = hfLocalizada;
           l.hf = hfTotal;
           l.formulaUsada = formula;
+          l.hfPorKm = l.l > 0 ? (hfTotal / l.l) * 1000 : 0;
         } else {
-          l.v = 0; l.hf = 0; l.hfDistribuida = 0; l.hfLocalizada = 0; l.formulaUsada = '-';
+          l.v = 0; l.hf = 0; l.hfDistribuida = 0; l.hfLocalizada = 0; l.formulaUsada = '-'; l.hfPorKm = 0;
         }
 
         l.cp_m = nodes[u].h;
         l.cp_j = l.cp_m - l.hf + (l.ajuste || 0);
+        l.cotaTerrenoM = nodes[u].cota;
 
         if (nodes[l.j]) {
           nodes[l.j].h = l.cp_j;
           l.p_m = l.cp_m - nodes[l.m].cota;
           l.p_j = l.cp_j - nodes[l.j].cota;
+          l.cotaTerrenoJ = nodes[l.j].cota;
+          if (cotaReservatorio !== null) {
+            l.desnivelM = cotaReservatorio - nodes[l.m].cota;
+            l.desnivelJ = cotaReservatorio - nodes[l.j].cota;
+          }
           fila.push(l.j);
         }
       });

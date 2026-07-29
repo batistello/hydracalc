@@ -4,17 +4,25 @@
 
 import { inicializarTabs } from './ui/tabs.js';
 import {
-  COLUNAS_TRECHO, COLUNAS_ADUTORA, COLUNAS_NO,
+  COLUNAS_TRECHO, COLUNAS_ADUTORA, COLUNAS_NO, COLUNAS_ACESSORIO,
   montarCabecalho, montarLinha, adicionarLinha, lerLinhas, inicializarRemocaoLinha
 } from './ui/tables.js';
 import { renderResultados } from './ui/render.js';
 import { vazaoMediaNo_m3s, vazaoDimensionamentoDistribuicao, vazaoDimensionamentoAdutora } from './core/demand.js';
 import { resolverRede } from './core/network-solver.js';
 import { calcularAdutora } from './core/pumping-main.js';
-import { acumularQuantitativo } from './core/quantities.js';
+import { acumularQuantitativo, consolidarQuantitativoGeral } from './core/quantities.js';
+import { calcularLigacaoDomiciliar, verificarDisponibilidadeHidrica, vazaoContinua24h_Lh } from './core/service-connection.js';
+import { MATERIAIS } from './core/constants.js';
 import { gerarMemorialPDF } from './report/pdf-report.js';
 
 inicializarTabs(document);
+
+// Data padrão = hoje
+document.getElementById('proj_data').value = new Date().toISOString().slice(0, 10);
+
+// Select de material da ligação domiciliar
+document.getElementById('lig_material').innerHTML = MATERIAIS.map(m => `<option value="${m.id}" ${m.id === 'PEAD' ? 'selected' : ''}>${m.nome}</option>`).join('');
 
 // --- Monta cabeçalhos e linha inicial das tabelas dinâmicas ---
 document.querySelector('#table-links thead').innerHTML = `<tr>${montarCabecalho(COLUNAS_TRECHO)}</tr>`;
@@ -23,13 +31,34 @@ document.querySelector('#body-dist').innerHTML = montarLinha(COLUNAS_TRECHO);
 document.querySelector('#table-adutora thead').innerHTML = `<tr>${montarCabecalho(COLUNAS_ADUTORA)}</tr>`;
 document.querySelector('#body-adut').innerHTML = montarLinha(COLUNAS_ADUTORA);
 
+document.querySelector('#table-acessorios thead').innerHTML = `<tr>${montarCabecalho(COLUNAS_ACESSORIO)}</tr>`;
+
 inicializarRemocaoLinha(document.querySelector('#table-nodes tbody'));
 inicializarRemocaoLinha(document.querySelector('#body-dist'));
 inicializarRemocaoLinha(document.querySelector('#body-adut'));
+inicializarRemocaoLinha(document.querySelector('#body-acessorios'));
 
 document.getElementById('btn-add-node').addEventListener('click', () => adicionarLinha(document.querySelector('#table-nodes tbody'), COLUNAS_NO));
 document.getElementById('btn-add-link').addEventListener('click', () => adicionarLinha(document.querySelector('#body-dist'), COLUNAS_TRECHO));
 document.getElementById('btn-add-adut').addEventListener('click', () => adicionarLinha(document.querySelector('#body-adut'), COLUNAS_ADUTORA));
+document.getElementById('btn-add-acessorio').addEventListener('click', () => adicionarLinha(document.querySelector('#body-acessorios'), COLUNAS_ACESSORIO));
+
+document.getElementById('btn-sugerir-hidrometros').addEventListener('click', () => {
+  const totalResidencias = lerLinhas(document.querySelector('#table-nodes tbody'), COLUNAS_NO)
+    .reduce((soma, n) => soma + (n.nResidencias || 0), 0);
+  const tbody = document.querySelector('#body-acessorios');
+  const jaTemHidrometro = Array.from(tbody.querySelectorAll('[data-field="item"]')).some(el => el.value.toLowerCase().includes('hidrômetro'));
+  if (jaTemHidrometro) {
+    alert('Já existe uma linha de hidrômetro na tabela de acessórios — ajuste a quantidade manualmente se necessário.');
+    return;
+  }
+  adicionarLinha(tbody, COLUNAS_ACESSORIO);
+  const ultimaLinha = tbody.lastElementChild;
+  ultimaLinha.querySelector('[data-field="item"]').value = 'Hidrômetro + kit';
+  ultimaLinha.querySelector('[data-field="diametro"]').value = '3/4"';
+  ultimaLinha.querySelector('[data-field="qtd"]').value = totalResidencias;
+  ultimaLinha.querySelector('[data-field="unidade"]').value = 'un.';
+});
 
 let ultimoProjeto = null;
 let ultimosParametros = null;
@@ -115,12 +144,48 @@ function processarProjeto() {
 
   const quantAdut = acumularQuantitativo(resultadoAdutora.trechos);
 
+  // --- Ligação domiciliar ---
+  const totalResidencias = nodesInput.reduce((soma, n) => soma + (n.nResidencias || 0), 0);
+  const ligacaoDomiciliar = calcularLigacaoDomiciliar({
+    totalResidencias,
+    comprimentoPadraoM: parseFloat(document.getElementById('lig_comprimento').value),
+    material: document.getElementById('lig_material').value,
+    deMm: parseFloat(document.getElementById('lig_diametro').value),
+    pn: parseFloat(document.getElementById('lig_pn').value)
+  });
+
+  // --- Disponibilidade hídrica ---
+  const vazaoExplotacaoM3h = parseFloat(document.getElementById('adut_explotacao').value);
+  const disponibilidadeHidrica = verificarDisponibilidadeHidrica({
+    vazaoExplotacaoM3h,
+    vazaoDimensionamentoM3h: qM3h
+  });
+  const vazao24h = vazaoContinua24h_Lh(volDiaM3);
+
+  // --- Acessórios ---
+  const acessorios = lerLinhas(document.querySelector('#body-acessorios'), COLUNAS_ACESSORIO);
+
+  // --- Quantitativo consolidado ---
+  const quantitativoGeral = consolidarQuantitativoGeral({ quantDist, quantAdut, ligacaoDomiciliar });
+
   const proj = {
+    identificacao: {
+      cliente: document.getElementById('proj_cliente').value,
+      local: document.getElementById('proj_local').value,
+      municipio: document.getElementById('proj_municipio').value,
+      data: document.getElementById('proj_data').value
+    },
     nodes: nodesResolvidos,
     links: linksResolvidos,
     adut: resultadoAdutora,
     quantDist,
     quantAdut,
+    ligacaoDomiciliar,
+    disponibilidadeHidrica,
+    vazaoExplotacaoM3h,
+    vazao24h,
+    acessorios,
+    quantitativoGeral,
     idReservatorio: idRes
   };
 

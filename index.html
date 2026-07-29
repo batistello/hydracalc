@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HydraCalc v2.0 — Dimensionamento de Redes de Água</title>
+  <title>HydraCalc v2.1 — Dimensionamento de Redes de Água</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -16,14 +16,16 @@
     <span class="brand-mark">H2</span>
     <div>
       <h1>HydraCalc</h1>
-      <p>v2.0 — Engenharia Hidráulica<br>Chapecó, SC</p>
+      <p>v2.1 — Engenharia Hidráulica<br>Chapecó, SC</p>
     </div>
   </div>
 
   <nav class="tab-nav">
-    <button class="tab-btn active" data-tab-target="dist">01 · Rede de Distribuição</button>
-    <button class="tab-btn" data-tab-target="adut">02 · Adutora de Recalque</button>
-    <button class="tab-btn" data-tab-target="param">03 · Parâmetros Normativos</button>
+    <button class="tab-btn active" data-tab-target="ident">01 · Identificação</button>
+    <button class="tab-btn" data-tab-target="dist">02 · Rede de Distribuição</button>
+    <button class="tab-btn" data-tab-target="adut">03 · Adutora de Recalque</button>
+    <button class="tab-btn" data-tab-target="lig">04 · Ligação Domiciliar & Acessórios</button>
+    <button class="tab-btn" data-tab-target="param">05 · Parâmetros Normativos</button>
   </nav>
 
   <div class="sidebar-actions">
@@ -36,7 +38,19 @@
 
 <main class="main-content">
 
-  <section data-tab-panel="dist">
+  <section data-tab-panel="ident">
+    <div class="panel">
+      <h2>Identificação do Projeto</h2>
+      <div class="field-grid field-grid-2">
+        <label>Cliente <input type="text" id="proj_cliente" value=""></label>
+        <label>Local <input type="text" id="proj_local" value=""></label>
+        <label>Município / UF <input type="text" id="proj_municipio" value=""></label>
+        <label>Data <input type="date" id="proj_data"></label>
+      </div>
+    </div>
+  </section>
+
+  <section data-tab-panel="dist" class="hide">
     <div class="panel">
       <h2>Configurações Globais — Distribuição</h2>
       <div class="field-grid field-grid-4">
@@ -79,11 +93,42 @@
     </div>
 
     <div class="panel">
+      <h2>Disponibilidade Hídrica</h2>
+      <div class="field-grid field-grid-2">
+        <label>Vazão de explotação do poço <span>m³/h — capacidade real da fonte</span><input type="number" id="adut_explotacao" value="5" step="0.1"></label>
+        <div class="hint-box">O nº de horas de bombeamento/dia usado no cálculo da vazão de dimensionamento está na aba <b>05 · Parâmetros Normativos</b>.</div>
+      </div>
+    </div>
+
+    <div class="panel">
       <h2>Trechos da Adutora</h2>
       <div class="table-scroll">
         <table id="table-adutora"><thead></thead><tbody id="body-adut"></tbody></table>
       </div>
       <button type="button" class="btn btn-add" id="btn-add-adut">+ Adicionar Trecho Adutora</button>
+    </div>
+  </section>
+
+  <section data-tab-panel="lig" class="hide">
+    <div class="panel">
+      <h2>Ligação Domiciliar</h2>
+      <p class="panel-hint">Comprimento do ramal do tubo principal até o cavalete de cada economia. Calculado como nº total de residências (soma da aba "02 · Rede de Distribuição") × comprimento padrão.</p>
+      <div class="field-grid field-grid-4">
+        <label>Comprimento padrão <span>m por ligação</span><input type="number" id="lig_comprimento" value="6" step="0.5"></label>
+        <label>Material <select id="lig_material"></select></label>
+        <label>Ø <span>mm</span><input type="number" id="lig_diametro" value="25"></label>
+        <label>Classe <span>PN, bar</span><input type="number" id="lig_pn" value="10"></label>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>Acessórios e Materiais Complementares</h2>
+      <p class="panel-hint">Hidrômetros, registros, uniões, adaptadores, tês etc. Não há como derivar isso automaticamente da topologia com segurança — cadastre conforme o projeto. Sugestão inicial: 1 hidrômetro por economia.</p>
+      <div class="table-scroll">
+        <table id="table-acessorios"><thead></thead><tbody id="body-acessorios"></tbody></table>
+      </div>
+      <button type="button" class="btn btn-add" id="btn-add-acessorio">+ Adicionar Acessório</button>
+      <button type="button" class="btn btn-add" id="btn-sugerir-hidrometros">+ Sugerir hidrômetros (nº de residências)</button>
     </div>
   </section>
 
@@ -116,18 +161,26 @@
     <div class="panel panel-result">
       <h2>Resultados da Simulação</h2>
       <div id="calculo-bomba" class="result-summary"></div>
+      <div id="disponibilidade-hidrica" class="result-summary"></div>
       <div class="table-scroll">
         <table id="res-final">
           <thead>
             <tr>
               <th rowspan="2">Trecho</th><th rowspan="2">L(m)</th>
               <th colspan="4">Vazão (L/s)</th>
-              <th rowspan="2">V(m/s)</th><th rowspan="2">hf(m)</th>
-              <th colspan="2">Cota Piezométrica</th><th colspan="2">Pressão (mca)</th>
+              <th rowspan="2">Ø int.(mm)</th>
+              <th rowspan="2">V(m/s)</th><th rowspan="2">hf(m)</th><th rowspan="2">hf(m/km)</th>
+              <th colspan="2">Cota Terreno</th>
+              <th colspan="2">Cota Piezométrica</th>
+              <th colspan="2">Desnível Res.</th>
+              <th colspan="2">Pressão (mca)</th>
             </tr>
             <tr>
               <th>Jus.</th><th>Mar.</th><th>Mon.</th><th>Fic.</th>
-              <th>Mon.</th><th>Jus.</th><th>Mon.</th><th>Jus.</th>
+              <th>Mon.</th><th>Jus.</th>
+              <th>Mon.</th><th>Jus.</th>
+              <th>Mon.</th><th>Jus.</th>
+              <th>Mon.</th><th>Jus.</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -146,7 +199,16 @@
           <h3>Rede Adutora</h3>
           <table id="q-adut"><thead><tr><th>Material / Especificação</th><th>Total</th></tr></thead><tbody></tbody></table>
         </div>
+        <div>
+          <h3>Ligação Domiciliar</h3>
+          <table id="q-lig"><thead><tr><th>Material / Especificação</th><th>Total</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div>
+          <h3>Acessórios</h3>
+          <table id="q-acessorios"><thead><tr><th>Item</th><th>Qtd.</th></tr></thead><tbody></tbody></table>
+        </div>
       </div>
+      <div id="total-geral-rede" class="result-summary" style="margin-top:16px;"></div>
     </div>
   </section>
 

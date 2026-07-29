@@ -26,13 +26,14 @@ export function calcularAdutora({ trechos, qM3s, qM3h, cotaPoco, cotaReservatori
     const velocidadeCheck = verificarVelocidade(v, limites.vMin, limites.vMax);
 
     const material = getMaterial(t.mat);
-    const celeridade = celeridadeAllievi(diM, t.espMm, material.E_kgf_cm2);
+    const celeridade = celeridadeAllievi(diM, t.espMm, material.kAllievi);
     const sobrepressao = sobrepressaoJoukowsky(celeridade, v);
 
     hfTotal += hfTrecho;
 
     return {
       ...t, di: diM, v, hf: hfTrecho, hfDistribuida: hf, hfLocalizada, formulaUsada: formula,
+      hfPorKm: t.l > 0 ? (hfTrecho / t.l) * 1000 : 0,
       velocidadeCheck, celeridade, sobrepressao, qM3h
     };
   });

@@ -26,9 +26,10 @@ export function renderResultados({ proj, limites }) {
       <tr class="row-adutora">
         <td><b>[AD]</b> ${a.id}</td><td>${a.l}</td>
         <td>${(a.qM3s * 1000).toFixed(3)}</td><td>-</td><td>${(a.qM3s * 1000).toFixed(3)}</td><td>${(a.qM3s * 1000).toFixed(3)}</td>
+        <td>${(a.di * 1000).toFixed(1)}</td>
         <td>${a.v.toFixed(2)} ${badge(vCheck.status === 'ok' ? 'ok' : vCheck.status)}</td>
-        <td>${a.hf.toFixed(3)}</td>
-        <td colspan="4">${a.formulaUsada} · golpe de aríete ≈ ${a.sobrepressao.toFixed(1)} mca (celeridade ${a.celeridade.toFixed(0)} m/s)</td>
+        <td>${a.hf.toFixed(3)}</td><td>${a.hfPorKm.toFixed(2)}</td>
+        <td colspan="8">${a.formulaUsada} · golpe de aríete ≈ ${a.sobrepressao.toFixed(1)} mca (celeridade ${a.celeridade.toFixed(0)} m/s)</td>
       </tr>
     `);
   });
@@ -45,9 +46,13 @@ export function renderResultados({ proj, limites }) {
         <td>${l.m}-${l.j}</td><td>${l.l}</td>
         <td>${(l.q_jus * 1000).toFixed(3)}</td><td>${(l.q_mar * 1000).toFixed(3)}</td>
         <td>${(l.q_mon * 1000).toFixed(3)}</td><td>${(l.q_fic * 1000).toFixed(3)}</td>
+        <td>${(l.diCalculado * 1000).toFixed(1)}</td>
         <td>${l.v.toFixed(2)} ${badge(vCheck.status)}</td>
         <td>${l.hf.toFixed(3)} <span class="hint">(${l.formulaUsada})</span></td>
+        <td>${l.hfPorKm.toFixed(2)}</td>
+        <td>${l.cotaTerrenoM.toFixed(2)}</td><td>${(l.cotaTerrenoJ ?? 0).toFixed(2)}</td>
         <td>${l.cp_m.toFixed(2)}</td><td>${l.cp_j.toFixed(2)}</td>
+        <td>${(l.desnivelM ?? 0).toFixed(2)}</td><td>${(l.desnivelJ ?? 0).toFixed(2)}</td>
         <td>${l.p_m.toFixed(2)} ${badge(pCheckMon.status)}</td>
         <td>${l.p_j.toFixed(2)} ${badge(pCheckJus.status)}</td>
       </tr>
@@ -58,6 +63,20 @@ export function renderResultados({ proj, limites }) {
   qd.innerHTML = Object.entries(proj.quantDist).map(([k, v]) => `<tr><td>${k}</td><td><b>${v.toFixed(1)} m</b></td></tr>`).join('');
   const qa = document.querySelector('#q-adut tbody');
   qa.innerHTML = Object.entries(proj.quantAdut).map(([k, v]) => `<tr><td>${k}</td><td><b>${v.toFixed(1)} m</b></td></tr>`).join('');
+  const ql = document.querySelector('#q-lig tbody');
+  ql.innerHTML = `<tr><td>${proj.ligacaoDomiciliar.especificacao}</td><td><b>${proj.ligacaoDomiciliar.comprimentoTotal.toFixed(1)} m</b></td></tr>
+    <tr><td class="hint">(${proj.ligacaoDomiciliar.totalResidencias} economias × ${proj.ligacaoDomiciliar.comprimentoPadraoM} m)</td><td></td></tr>`;
+  const qac = document.querySelector('#q-acessorios tbody');
+  qac.innerHTML = proj.acessorios.length
+    ? proj.acessorios.map(a => `<tr><td>${a.item} ${a.diametro}</td><td><b>${a.qtd} ${a.unidade}</b></td></tr>`).join('')
+    : '<tr><td colspan="2" class="hint">Nenhum acessório cadastrado (aba "04 · Ligação Domiciliar &amp; Acessórios")</td></tr>';
+
+  document.getElementById('total-geral-rede').innerHTML = `
+    <strong>TOTAL GERAL DE TUBULAÇÃO:</strong> ${proj.quantitativoGeral.totalGeral.toFixed(1)} m
+    <span class="hint">(distribuição ${proj.quantitativoGeral.categorias[0].subtotal.toFixed(1)} m +
+    adutora ${proj.quantitativoGeral.categorias[1].subtotal.toFixed(1)} m +
+    ligação domiciliar ${proj.quantitativoGeral.categorias[2].subtotal.toFixed(1)} m)</span>
+  `;
 
   document.getElementById('calculo-bomba').innerHTML = `
     <strong>MEMORIAL DA ADUTORA:</strong>
@@ -65,6 +84,16 @@ export function renderResultados({ proj, limites }) {
     Altura geométrica: ${proj.adut.alturaGeometrica.toFixed(2)} m —
     Perda de carga total (com localizadas): ${proj.adut.hfTotal.toFixed(2)} m —
     <b>AMT: ${proj.adut.amt.toFixed(2)} mca</b>
+  `;
+
+  const dh = proj.disponibilidadeHidrica;
+  const dispEl = document.getElementById('disponibilidade-hidrica');
+  dispEl.className = 'result-summary ' + (dh.suficiente ? 'status-ok' : 'status-alerta');
+  dispEl.innerHTML = `
+    <strong>DISPONIBILIDADE HÍDRICA:</strong>
+    Explotação do poço: ${proj.vazaoExplotacaoM3h.toFixed(2)} m³/h vs. vazão exigida: ${(proj.adut.trechos[0]?.qM3h ?? 0).toFixed(2)} m³/h
+    — ${dh.suficiente ? `margem de ${dh.margemPercentual.toFixed(0)}%` : `DÉFICIT de ${Math.abs(dh.margemPercentual).toFixed(0)}% — poço não atende a demanda de projeto`}.
+    <span class="hint">Vazão equivalente em regime contínuo (24h): ${proj.vazao24h.toFixed(1)} L/h.</span>
   `;
 
   const diagramEl = document.getElementById('network-diagram');

@@ -1,5 +1,5 @@
 /* ==========================================================================
-   HydraCalc v2.0 — Identidade visual "prancha de engenharia"
+   HydraCalc v2.1 — Identidade visual "prancha de engenharia"
    Paleta: azul de anteprojeto (blueprint), grid milimetrado, tipografia
    técnica (Space Grotesk para títulos, IBM Plex Sans para UI, IBM Plex Mono
    para todo dado numérico — números de engenharia devem parecer números).
@@ -123,6 +123,8 @@ body {
   border-left: 4px solid var(--accent);
 }
 .panel h3 { font-family: var(--font-display); font-size: 0.85rem; color: var(--ink-soft); margin: 0 0 10px; }
+.panel-hint { font-size: 0.78rem; color: var(--ink-soft); margin: -8px 0 16px; line-height: 1.5; }
+.hint-box { grid-column: span 1; font-size: 0.72rem; color: var(--ink-soft); background: var(--white); border: 1px dashed var(--paper-line); border-radius: 6px; padding: 10px 12px; align-self: end; }
 
 .field-grid { display: grid; gap: 18px; background: var(--paper); padding: 18px; border-radius: 8px; }
 .field-grid-2 { grid-template-columns: repeat(2, 1fr); }
@@ -161,6 +163,8 @@ tr:nth-child(even) td { background: var(--paper); }
 /* ---------- Resultado / diagrama ---------- */
 .panel-result { border-color: var(--accent); }
 .result-summary { background: var(--paper); border-radius: 8px; padding: 16px 18px; margin-bottom: 20px; font-size: 0.85rem; font-family: var(--font-mono); }
+.result-summary.status-ok { background: var(--ok-bg); color: var(--ok); }
+.result-summary.status-alerta { background: var(--alerta-bg); color: var(--alerta); }
 
 .network-diagram { background: var(--paper); border-radius: 8px; padding: 12px; }
 .diagram-empty { font-size: 0.8rem; color: var(--ink-soft); padding: 20px; text-align: center; }
