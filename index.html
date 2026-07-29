@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HydraCalc v2.6 — Dimensionamento de Redes de Água</title>
+  <title>HydraCalc v3.1 — Dimensionamento de Redes de Água</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -16,7 +16,7 @@
     <span class="brand-mark">H2</span>
     <div>
       <h1>HydraCalc</h1>
-      <p>v2.6 — Engenharia Hidráulica<br>Chapecó, SC</p>
+      <p>v3.1 — Engenharia Hidráulica<br>Chapecó, SC</p>
     </div>
   </div>
 
@@ -26,6 +26,7 @@
     <button class="tab-btn" data-tab-target="adut">03 · Adutora de Recalque</button>
     <button class="tab-btn" data-tab-target="lig">04 · Ligação Domiciliar & Acessórios</button>
     <button class="tab-btn" data-tab-target="param">05 · Parâmetros Normativos</button>
+    <button class="tab-btn" data-tab-target="admin" id="tab-btn-admin" style="display:none;">06 · Administração</button>
   </nav>
 
   <div class="sidebar-projects">
@@ -49,6 +50,11 @@
   </div>
 
   <p class="sidebar-note">Valores normativos (K1, K2, faixas de velocidade/pressão) são referências usuais — confirme sempre com a norma vigente antes de assinar o memorial.</p>
+
+  <div class="sidebar-user">
+    <span id="usuario-logado">—</span>
+    <button type="button" id="btn-logout">Sair</button>
+  </div>
 </aside>
 
 <main class="main-content">
@@ -161,6 +167,30 @@
         <label>Pressão dinâmica mínima (padrão p/ novos nós) <span>mca — ajustável por nó na aba 02</span><input type="number" id="param_p_min" value="10" step="1"></label>
         <label>Perdas localizadas <span>%</span><input type="number" id="param_perc_localizadas" value="10" step="1"></label>
       </div>
+    </div>
+  </section>
+
+  <section data-tab-panel="admin" class="hide">
+    <div class="panel">
+      <h2>Criar Usuário</h2>
+      <p class="panel-hint">Usuários comuns têm acesso completo ao HydraCalc, exceto a esta aba de administração.</p>
+      <div class="field-grid field-grid-3">
+        <label>Email <input type="email" id="admin_novo_email" placeholder="pessoa@exemplo.com"></label>
+        <label>Senha <span>mínimo 8 caracteres</span><input type="password" id="admin_novo_senha"></label>
+        <label style="display:flex; flex-direction:row; align-items:center; gap:8px; margin-top:22px;">
+          <input type="checkbox" id="admin_novo_role" style="width:auto;"> É administrador?
+        </label>
+      </div>
+      <button type="button" class="btn btn-calc" id="btn-criar-usuario" style="margin-top:18px; max-width:220px;">Criar Usuário</button>
+      <div id="admin-msg" class="result-summary" style="display:none; margin-top:16px;"></div>
+    </div>
+
+    <div class="panel">
+      <h2>Usuários Cadastrados</h2>
+      <table id="table-usuarios">
+        <thead><tr><th>Email</th><th>Papel</th><th>Criado em</th><th>Ações</th></tr></thead>
+        <tbody></tbody>
+      </table>
     </div>
   </section>
 

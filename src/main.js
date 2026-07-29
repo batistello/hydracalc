@@ -23,6 +23,81 @@ inicializarTabs(document);
 // Data padrão = hoje
 document.getElementById('proj_data').value = new Date().toISOString().slice(0, 10);
 
+// --- Sessão: mostra o usuário logado, permite sair, e libera admin se for o caso ---
+fetch('/api/me').then(r => r.json()).then(({ autenticado, email, role }) => {
+  document.getElementById('usuario-logado').textContent = autenticado ? email : '';
+  if (role === 'admin') {
+    document.getElementById('tab-btn-admin').style.display = 'block';
+    carregarUsuarios();
+  }
+}).catch(() => {});
+
+document.getElementById('btn-logout').addEventListener('click', async () => {
+  await fetch('/api/logout', { method: 'POST' });
+  window.location.href = '/login.html';
+});
+
+// --- Administração de usuários (só carrega/funciona de verdade se a API aceitar — proteção real é no servidor) ---
+
+function mostrarMsgAdmin(texto, tipo) {
+  const el = document.getElementById('admin-msg');
+  el.textContent = texto;
+  el.className = 'result-summary ' + (tipo === 'erro' ? 'status-alerta' : 'status-ok');
+  el.style.display = 'block';
+}
+
+async function carregarUsuarios() {
+  const resp = await fetch('/api/admin/users');
+  if (!resp.ok) return;
+  const { usuarios } = await resp.json();
+  const tbody = document.querySelector('#table-usuarios tbody');
+  tbody.innerHTML = usuarios.map(u => `
+    <tr>
+      <td>${u.email}</td>
+      <td>${u.role === 'admin' ? '<b>Administrador</b>' : 'Usuário'}</td>
+      <td>${new Date(u.criadoEm).toLocaleDateString('pt-BR')}</td>
+      <td><button type="button" class="btn-remove" data-email="${u.email}" data-action="excluir-usuario">Excluir</button></td>
+    </tr>
+  `).join('');
+}
+
+document.getElementById('btn-criar-usuario').addEventListener('click', async () => {
+  const email = document.getElementById('admin_novo_email').value.trim();
+  const senha = document.getElementById('admin_novo_senha').value;
+  const role = document.getElementById('admin_novo_role').checked ? 'admin' : 'user';
+
+  const resp = await fetch('/api/admin/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, senha, role })
+  });
+  const data = await resp.json();
+
+  if (resp.ok && data.ok) {
+    mostrarMsgAdmin(`Usuário "${email}" criado.`, 'ok');
+    document.getElementById('admin_novo_email').value = '';
+    document.getElementById('admin_novo_senha').value = '';
+    document.getElementById('admin_novo_role').checked = false;
+    carregarUsuarios();
+  } else {
+    mostrarMsgAdmin(data.erro || 'Não foi possível criar o usuário.', 'erro');
+  }
+});
+
+document.querySelector('#table-usuarios tbody')?.addEventListener('click', async (e) => {
+  if (e.target.dataset.action !== 'excluir-usuario') return;
+  const email = e.target.dataset.email;
+  if (!confirm(`Excluir o usuário "${email}"? Essa ação não pode ser desfeita.`)) return;
+
+  const resp = await fetch(`/api/admin/users/${encodeURIComponent(email)}`, { method: 'DELETE' });
+  const data = await resp.json();
+  if (resp.ok && data.ok) {
+    carregarUsuarios();
+  } else {
+    alert(data.erro || 'Não foi possível excluir.');
+  }
+});
+
 // Select de material da ligação domiciliar
 document.getElementById('lig_material').innerHTML = MATERIAIS.map(m => `<option value="${m.id}" ${m.id === 'PEAD' ? 'selected' : ''}>${m.nome}</option>`).join('');
 

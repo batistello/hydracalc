@@ -1,6 +1,50 @@
-# HydraCalc v2.1
+# HydraCalc v3.1
 
 Dimensionamento de redes de água (distribuição ramificada + adutora de recalque), com memorial técnico em PDF.
+
+## v3.1 — administração de usuários
+
+- Usuários agora têm um papel (`role`): `admin` ou `user`.
+- Aba **"06 · Administração"** (só aparece na tela pra quem é admin) — cria usuário, lista usuários cadastrados, exclui usuário.
+- **A proteção de verdade é no servidor**: as rotas `/api/admin/users` (listar, criar, excluir) exigem `role === 'admin'` — testei com um usuário comum e a API recusa com 403 mesmo se alguém tentar chamar a rota direto, sem passar pela tela. Esconder o botão no frontend é só cosmético.
+- Usuário comum tem acesso **completo** ao resto do app — só não vê/acessa essa aba.
+- Regras de segurança extra: admin não pode se autoexcluir enquanto logado, e não é possível excluir o último admin do sistema (evita ficar sem acesso administrativo).
+- **Migração**: o usuário admin já existente no servidor (criado antes desta versão) não tem o campo `role` — rode `node server/migrate-add-roles.mjs` uma vez após o deploy pra corrigir isso automaticamente.
+
+## v3.0 — autenticação (mudança de arquitetura)
+
+**O app deixou de ser 100% estático.** Agora tem um servidor Node (`server/`) que:
+- Serve o app buildado (`dist/`) e a página de login (`public/login.html`)
+- Protege o acesso: sem login, qualquer tentativa de abrir `/` redireciona pro login
+- Autentica contra `server/users.json` (senha SEMPRE com hash bcrypt, nunca texto puro — arquivo gitignored, não vai pro GitHub)
+- Sessão em cookie `httpOnly` + `secure` (HTTPS) + `sameSite=lax`, segredo gerado aleatoriamente na primeira execução
+- Rate limit no login (10 tentativas / 15 min por IP) contra força bruta — testado, dispara certinho na 11ª tentativa
+- Cabeçalhos de segurança via `helmet` (HSTS, X-Frame-Options, X-Content-Type-Options etc.) — testado
+- Mensagem de erro genérica no login (não revela se o email existe)
+
+**Isso muda o deploy**: o Nginx não serve mais os arquivos direto (`root`) — agora faz `proxy_pass` pro processo Node (porta 3030, gerenciado via PM2). Ver seção de deploy no chat / próxima mensagem.
+
+⚠️ **Limitações conhecidas desta v1 de autenticação** (documentado, não escondido):
+- Só existe cadastro de usuário via linha de comando (`npm run seed:admin` / `server/alterar-senha.mjs`) — não há tela de "criar conta" ou "esqueci minha senha" no navegador ainda.
+- Sessões ficam em memória do processo — reiniciar o servidor derruba todo mundo logado (aceitável pra uma ferramenta interna de poucos usuários; se crescer, trocar por um session store persistente).
+- Um usuário só, por enquanto — sem diferenciação de papéis/permissões.
+
+## Rodando o servidor localmente
+
+```bash
+npm install
+npm run build          # gera dist/
+npm run seed:admin     # cria o usuário admin (só precisa rodar 1x)
+npm run server          # sobe o servidor na porta 3030
+```
+
+Acesse http://localhost:3030 — deve redirecionar pro login.
+
+## Trocar a senha de um usuário
+
+```bash
+node server/alterar-senha.mjs admin@dendev.com.br "NovaSenhaForte123!"
+```
 
 ## v2.1 — incorporado a partir da planilha de referência (10 anos de uso em campo)
 

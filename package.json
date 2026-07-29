@@ -1,17 +1,24 @@
 {
   "name": "hydracalc",
-  "version": "2.6.0",
+  "version": "3.1.0",
   "description": "HydraCalc - Dimensionamento de redes de água (distribuição e adutora) com embasamento técnico",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "server": "node server/index.js",
+    "seed:admin": "node server/seed-admin.mjs"
   },
   "devDependencies": {
     "vite": "^5.4.10"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.6.1",
+    "express-session": "^1.19.0",
+    "helmet": "^8.3.0",
     "jspdf": "^2.5.2",
     "jspdf-autotable": "^3.8.4"
   }

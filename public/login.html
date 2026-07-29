@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HydraCalc — Entrar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --blueprint: #0b3d6b;
+      --blueprint-deep: #082c4f;
+      --paper: #eef2f6;
+      --paper-line: #d3dee8;
+      --ink: #17222e;
+      --ink-soft: #4d5b68;
+      --accent: #0b8f8f;
+      --accent-soft: #d7f0ef;
+      --alerta: #c23b22;
+      --alerta-bg: #fbe6e1;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'IBM Plex Sans', sans-serif;
+      background:
+        linear-gradient(var(--paper-line) 1px, transparent 1px) 0 0 / 100% 32px,
+        linear-gradient(90deg, var(--paper-line) 1px, transparent 1px) 0 0 / 32px 100%,
+        var(--paper);
+    }
+    .card {
+      background: #fff;
+      border: 1px solid var(--paper-line);
+      border-radius: 12px;
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 8px 30px rgba(11, 61, 107, 0.1);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 28px; }
+    .brand-mark {
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 600;
+      font-size: 0.85rem;
+      background: var(--accent);
+      color: #fff;
+      padding: 6px 8px;
+      border-radius: 4px;
+    }
+    .brand h1 { font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; margin: 0; color: var(--blueprint); }
+    .brand p { font-size: 0.7rem; color: var(--ink-soft); margin: 2px 0 0; }
+    label { display: block; font-size: 0.78rem; color: var(--ink-soft); font-weight: 500; margin-bottom: 6px; margin-top: 16px; }
+    input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--paper-line); border-radius: 6px;
+      font-family: 'IBM Plex Mono', monospace; font-size: 0.9rem; color: var(--ink);
+    }
+    input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+    button {
+      width: 100%; margin-top: 24px; padding: 12px; border: none; border-radius: 6px;
+      background: var(--accent); color: #fff; font-weight: 600; font-size: 0.9rem; cursor: pointer;
+      font-family: 'IBM Plex Sans', sans-serif;
+    }
+    button:hover { filter: brightness(1.08); }
+    button:disabled { opacity: 0.6; cursor: default; }
+    .erro {
+      display: none; margin-top: 16px; padding: 10px 12px; border-radius: 6px;
+      background: var(--alerta-bg); color: var(--alerta); font-size: 0.8rem;
+    }
+    .erro.mostrar { display: block; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="brand">
+      <span class="brand-mark">H2</span>
+      <div>
+        <h1>HydraCalc</h1>
+        <p>Engenharia Hidráulica — acesso restrito</p>
+      </div>
+    </div>
+
+    <form id="form-login">
+      <label for="email">Email</label>
+      <input type="email" id="email" autocomplete="username" required>
+
+      <label for="senha">Senha</label>
+      <input type="password" id="senha" autocomplete="current-password" required>
+
+      <div class="erro" id="erro"></div>
+
+      <button type="submit" id="btn-entrar">Entrar</button>
+    </form>
+  </div>
+
+  <script>
+    const form = document.getElementById('form-login');
+    const erroEl = document.getElementById('erro');
+    const btn = document.getElementById('btn-entrar');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      erroEl.classList.remove('mostrar');
+      btn.disabled = true;
+      btn.textContent = 'Entrando...';
+
+      try {
+        const resp = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: document.getElementById('email').value,
+            senha: document.getElementById('senha').value
+          })
+        });
+        const data = await resp.json();
+        if (resp.ok && data.ok) {
+          window.location.href = '/';
+        } else {
+          erroEl.textContent = data.erro || 'Não foi possível entrar.';
+          erroEl.classList.add('mostrar');
+        }
+      } catch {
+        erroEl.textContent = 'Erro de conexão. Tente novamente.';
+        erroEl.classList.add('mostrar');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Entrar';
+      }
+    });
+  </script>
+</body>
+</html>

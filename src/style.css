@@ -92,6 +92,10 @@ body {
 .sidebar-actions { margin-top: auto; padding-top: 24px; display: flex; flex-direction: column; gap: 10px; }
 .sidebar-note { font-size: 0.68rem; opacity: 0.55; line-height: 1.5; margin-top: 18px; }
 
+.sidebar-user { margin-top: 16px; padding-top: 14px; border-top: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: space-between; font-size: 0.7rem; opacity: 0.75; }
+.sidebar-user button { background: none; border: none; color: rgba(255,255,255,0.75); text-decoration: underline; cursor: pointer; font-size: 0.7rem; font-family: var(--font-body); padding: 0; }
+.sidebar-user button:hover { color: #fff; }
+
 .sidebar-projects { margin-top: 24px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.12); display: flex; flex-direction: column; gap: 8px; }
 .sidebar-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; opacity: 0.6; margin: 0 0 2px; }
 .sidebar-projects select { width: 100%; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); color: var(--white); }
