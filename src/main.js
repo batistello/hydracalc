@@ -73,6 +73,22 @@ function processarProjeto() {
     q_jus: 0, q_mar: 0, q_mon: 0, q_fic: 0, v: 0, hf: 0, cp_m: 0, cp_j: 0, p_m: 0, p_j: 0
   }));
 
+  // Aviso (não bloqueia o cálculo): trecho aponta pra um nó que não foi
+  // cadastrado na tabela "Cadastro de Nós" — o sistema trata a demanda desse
+  // nó como zero, o que silenciosamente zera a vazão de toda a rede a
+  // jusante dele. Melhor avisar do que deixar passar batido.
+  const idsNaoCadastrados = new Set();
+  links.forEach(l => {
+    if (!nodes[l.m]) idsNaoCadastrados.add(l.m);
+    if (!nodes[l.j]) idsNaoCadastrados.add(l.j);
+  });
+  if (idsNaoCadastrados.size > 0) {
+    alert(
+      `Atenção: os seguintes IDs aparecem em trechos mas não foram cadastrados na tabela "Cadastro de Nós": ${[...idsNaoCadastrados].join(', ')}.\n\n` +
+      `Sem cadastro, o sistema assume cota e demanda ZERO para esses nós — isso zera a vazão de qualquer trecho a jusante deles. Cadastre-os na tabela de nós se eles têm residências/cota real.`
+    );
+  }
+
   const { nodes: nodesResolvidos, links: linksResolvidos } = resolverRede({
     nodes, links, idReservatorio: idRes, nivelReservatorio: nivelCr, percLocalizadas: parametros.percLocalizadas
   });

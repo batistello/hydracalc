@@ -1,7 +1,7 @@
-import { vazaoMediaNo_m3s, vazaoDimensionamentoDistribuicao, vazaoDimensionamentoAdutora } from './src/core/demand.js';
-import { resolverRede } from './src/core/network-solver.js';
-import { calcularAdutora } from './src/core/pumping-main.js';
-import { acumularQuantitativo } from './src/core/quantities.js';
+import { vazaoMediaNo_m3s, vazaoDimensionamentoDistribuicao, vazaoDimensionamentoAdutora } from '../src/core/demand.js';
+import { resolverRede } from '../src/core/network-solver.js';
+import { calcularAdutora } from '../src/core/pumping-main.js';
+import { acumularQuantitativo } from '../src/core/quantities.js';
 
 // Cenário equivalente ao exemplo padrão da v1.8
 const qHab = 200, habRes = 4, k1 = 1.2, k2 = 1.5;

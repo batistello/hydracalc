@@ -34,7 +34,7 @@ export function gerarMemorialPDF({ proj, parametros }) {
   ]));
   const bodyDist = proj.links.map(l => ([
     l.m + '-' + l.j, l.l, (l.q_mon * 3600).toFixed(2), (l.q_mon * 1000).toFixed(2), l.v.toFixed(2), l.hf.toFixed(2),
-    l.formulaUsada, `CP ${l.cp_m.toFixed(2)}→${l.cp_j.toFixed(2)} / P ${l.p_m.toFixed(2)}→${l.p_j.toFixed(2)}`
+    l.formulaUsada, `CP ${l.cp_m.toFixed(2)} -> ${l.cp_j.toFixed(2)} / P ${l.p_m.toFixed(2)} -> ${l.p_j.toFixed(2)}`
   ]));
 
   doc.autoTable({
