@@ -26,7 +26,8 @@ export const COLUNAS_TRECHO = [
   { field: 'espMm', label: 'Esp. (mm)', tipo: 'number', padrao: 3.0 },
   { field: 'pn', label: 'Classe (PN, bar)', tipo: 'number', padrao: 8 },
   { field: 'c', label: 'C (H-W)', tipo: 'number', padrao: 140 },
-  { field: 'ajuste', label: 'Ajuste (m)', tipo: 'number', padrao: 0 }
+  { field: 'ajuste', label: 'Ajuste (m)', tipo: 'number', padrao: 0 },
+  { field: 'obs', label: 'Observação (o que é o ajuste)', tipo: 'text', padrao: '' }
 ];
 
 export const COLUNAS_ADUTORA = [

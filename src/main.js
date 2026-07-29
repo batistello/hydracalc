@@ -100,7 +100,7 @@ function processarProjeto() {
 
   // --- Trechos de distribuição ---
   const links = lerLinhas(document.querySelector('#body-dist'), COLUNAS_TRECHO).map(t => ({
-    m: t.de, j: t.para, l: t.l, mat: t.mat, deMm: t.deMm, espMm: t.espMm, pn: t.pn, c: t.c, ajuste: t.ajuste,
+    m: t.de, j: t.para, l: t.l, mat: t.mat, deMm: t.deMm, espMm: t.espMm, pn: t.pn, c: t.c, ajuste: t.ajuste, obs: t.obs,
     q_jus: 0, q_mar: 0, q_mon: 0, q_fic: 0, v: 0, hf: 0, cp_m: 0, cp_j: 0, p_m: 0, p_j: 0
   }));
 

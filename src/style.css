@@ -166,6 +166,9 @@ tr:nth-child(even) td { background: var(--paper); }
 .badge-ok { background: var(--ok-bg); color: var(--ok); }
 .badge-alerta { background: var(--alerta-bg); color: var(--alerta); }
 .hint { font-family: var(--font-body); font-size: 0.65rem; color: var(--ink-soft); }
+.texto-alerta { color: var(--alerta); }
+.texto-ok { color: var(--accent); }
+.celula-obs { text-align: left !important; font-family: var(--font-body); max-width: 160px; }
 
 /* ---------- Resultado / diagrama ---------- */
 .panel-result { border-color: var(--accent); }

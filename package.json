@@ -1,6 +1,6 @@
 {
   "name": "hydracalc",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "HydraCalc - Dimensionamento de redes de água (distribuição e adutora) com embasamento técnico",
   "type": "module",
   "scripts": {

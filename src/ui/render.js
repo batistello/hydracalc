@@ -29,7 +29,7 @@ export function renderResultados({ proj, limites }) {
         <td>${(a.di * 1000).toFixed(1)}</td>
         <td>${a.v.toFixed(2)} ${badge(vCheck.status === 'ok' ? 'ok' : vCheck.status)}</td>
         <td>${a.hf.toFixed(3)}</td><td>${a.hfPorKm.toFixed(2)}</td>
-        <td colspan="8">${a.formulaUsada} · golpe de aríete ≈ ${a.sobrepressao.toFixed(1)} mca (celeridade ${a.celeridade.toFixed(0)} m/s)</td>
+        <td colspan="10">${a.formulaUsada} · golpe de aríete ≈ ${a.sobrepressao.toFixed(1)} mca (celeridade ${a.celeridade.toFixed(0)} m/s)</td>
       </tr>
     `);
   });
@@ -55,6 +55,8 @@ export function renderResultados({ proj, limites }) {
         <td>${(l.desnivelM ?? 0).toFixed(2)}</td><td>${(l.desnivelJ ?? 0).toFixed(2)}</td>
         <td>${l.p_m.toFixed(2)} ${badge(pCheckMon.status)}</td>
         <td>${l.p_j.toFixed(2)} ${badge(pCheckJus.status)}</td>
+        <td>${l.ajuste ? `<b class="${l.ajuste < 0 ? 'texto-alerta' : 'texto-ok'}">${l.ajuste > 0 ? '+' : ''}${l.ajuste.toFixed(2)}</b>` : '0.00'}</td>
+        <td class="celula-obs">${l.obs || (l.ajuste ? '<span class="hint">(sem observação preenchida)</span>' : '')}</td>
       </tr>
     `);
   });

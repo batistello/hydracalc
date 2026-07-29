@@ -15,7 +15,7 @@ export function gerarMemorialPDF({ proj, parametros }) {
   doc.setFontSize(14);
   doc.text('MEMORIAL TÉCNICO DE CÁLCULO HIDRÁULICO', 14, 15);
   doc.setFontSize(9);
-  doc.text('HydraCalc v2.2 — ' + new Date().toLocaleDateString(), 14, 20);
+  doc.text('HydraCalc v2.3 — ' + new Date().toLocaleDateString(), 14, 20);
 
   const id = proj.identificacao || {};
   doc.setFontSize(8);
@@ -48,7 +48,7 @@ export function gerarMemorialPDF({ proj, parametros }) {
     '-', '-', (a.qM3s * 1000).toFixed(3), (a.qM3s * 1000).toFixed(3),
     a.deMm, (a.di * 1000).toFixed(1),
     a.v.toFixed(2), a.hfPorKm.toFixed(2), a.hf.toFixed(2),
-    '-', '-', '-', '-', '-', '-', '-', '-'
+    '-', '-', '-', '-', '-', '-', '-', '-', '-', '-'
   ]));
   const bodyDist = proj.links.map(l => ([
     l.m + '-' + l.j, l.l, l.mat, l.pn,
@@ -58,7 +58,9 @@ export function gerarMemorialPDF({ proj, parametros }) {
     l.cp_m.toFixed(2), l.cp_j.toFixed(2),
     l.cotaTerrenoM.toFixed(2), (l.cotaTerrenoJ ?? 0).toFixed(2),
     l.p_m.toFixed(2), l.p_j.toFixed(2),
-    (l.desnivelM ?? 0).toFixed(2), (l.desnivelJ ?? 0).toFixed(2)
+    (l.desnivelM ?? 0).toFixed(2), (l.desnivelJ ?? 0).toFixed(2),
+    l.ajuste ? l.ajuste.toFixed(2) : '0.00',
+    l.obs || (l.ajuste ? '(sem obs.)' : '-')
   ]));
 
   doc.autoTable({
@@ -71,12 +73,13 @@ export function gerarMemorialPDF({ proj, parametros }) {
       'CP Mon.(m)', 'CP Jus.(m)',
       'Terreno Mon.(m)', 'Terreno Jus.(m)',
       'Pressão Mon.(mca)', 'Pressão Jus.(mca)',
-      'Desnível Mon.(m)', 'Desnível Jus.(m)'
+      'Desnível Mon.(m)', 'Desnível Jus.(m)',
+      'Ajuste(m)', 'Observação (ajuste)'
     ]],
     body: [...bodyAdut, ...bodyDist],
     styles: { fontSize: 5.5, halign: 'center', cellPadding: 0.8 },
     headStyles: { fillColor: [30, 58, 138], fontSize: 5.5 },
-    columnStyles: { 0: { fontStyle: 'bold' } }
+    columnStyles: { 0: { fontStyle: 'bold' }, 22: { halign: 'left', fontSize: 5 } }
   });
 
   doc.setFontSize(7);
