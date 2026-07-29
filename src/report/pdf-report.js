@@ -40,7 +40,7 @@ export function gerarMemorialPDF({ proj, parametros }) {
   doc.setFontSize(14);
   doc.text('MEMORIAL TÉCNICO DE CÁLCULO HIDRÁULICO', M, 15);
   doc.setFontSize(9);
-  doc.text('HydraCalc v3.1 — ' + new Date().toLocaleDateString(), M, 20);
+  doc.text('HydraCalc v3.2 — ' + new Date().toLocaleDateString(), M, 20);
 
   const id = proj.identificacao || {};
   doc.setFontSize(8);

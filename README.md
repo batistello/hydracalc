@@ -1,6 +1,12 @@
-# HydraCalc v3.1
+# HydraCalc v3.2
 
 Dimensionamento de redes de água (distribuição ramificada + adutora de recalque), com memorial técnico em PDF.
+
+## v3.2 — instalação automatizada
+
+- **`REQUIREMENTS.md`**: lista o que precisa estar no servidor (Node, PM2, Nginx+Certbot) e as dependências do projeto.
+- **`install.sh`**: automatiza `npm install` → `npm run build` → cria admin (só na primeira vez) → roda migração de roles → sobe/reinicia no PM2. Testado 2x seguidas aqui (primeira instalação e reinstalação) — idempotente, não duplica processo nem recria usuário.
+- Continua faltando automatizar só a config do Nginx (mexe em arquivo de sistema fora da pasta do projeto — mantido como passo manual documentado no README, de propósito).
 
 ## v3.1 — administração de usuários
 
@@ -24,7 +30,7 @@ Dimensionamento de redes de água (distribuição ramificada + adutora de recalq
 
 **Isso muda o deploy**: o Nginx não serve mais os arquivos direto (`root`) — agora faz `proxy_pass` pro processo Node (porta 3030, gerenciado via PM2). Ver seção de deploy no chat / próxima mensagem.
 
-⚠️ **Limitações conhecidas desta v1 de autenticação** (documentado, não escondido):
+**Atenção — limitações conhecidas desta v1 de autenticação** (documentado, não escondido):
 - Só existe cadastro de usuário via linha de comando (`npm run seed:admin` / `server/alterar-senha.mjs`) — não há tela de "criar conta" ou "esqueci minha senha" no navegador ainda.
 - Sessões ficam em memória do processo — reiniciar o servidor derruba todo mundo logado (aceitável pra uma ferramenta interna de poucos usuários; se crescer, trocar por um session store persistente).
 - Um usuário só, por enquanto — sem diferenciação de papéis/permissões.
@@ -75,7 +81,7 @@ node server/alterar-senha.mjs admin@dendev.com.br "NovaSenhaForte123!"
 
 **Limitação que continua existindo (documentada, não escondida):** o solver de rede de distribuição resolve apenas topologia **ramificada (árvore, sem anéis)**. Para redes malhadas seria necessário um método tipo Hardy-Cross — fora do escopo desta versão.
 
-⚠️ **Os valores normativos (K1, K2, faixas de velocidade/pressão, % de perdas localizadas, coeficientes k) são referências usuais da literatura técnica brasileira, ficam editáveis na tela "05 · Parâmetros Normativos" e devem ser conferidos pelo responsável técnico contra a norma vigente (NBR 12211, NBR 12218, NBR 5626) antes de qualquer memorial assinado.**
+**Atenção:** Os valores normativos (K1, K2, faixas de velocidade/pressão, % de perdas localizadas, coeficientes k) são referências usuais da literatura técnica brasileira, ficam editáveis na tela "05 · Parâmetros Normativos" e devem ser conferidos pelo responsável técnico contra a norma vigente (NBR 12211, NBR 12218, NBR 5626) antes de qualquer memorial assinado.
 
 ## Rodando localmente
 
