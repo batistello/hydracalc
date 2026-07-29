@@ -63,11 +63,15 @@ export function renderNetworkDiagram({ nodes, links, idReservatorio, statusPorTr
     const a = pos[l.m], b = pos[l.j];
     const status = statusPorTrecho?.[`${l.m}-${l.j}`] || 'neutro';
     const cor = status === 'alerta' ? COLOR_ALERTA : status === 'ok' ? COLOR_OK : COLOR_LINE;
-    const midX = (a.x + b.x) / 2;
+    // Curva de Bézier cúbica independente por trecho (em vez de cotovelo
+    // ortogonal compartilhado). Cada trecho nasce direto do círculo do nó
+    // de montante — evita sugerir um "entroncamento" que não existe nos
+    // dados quando dois trechos saem do mesmo nó (ex.: A->B e A->C).
+    const cX = (a.x + b.x) / 2;
     svgLinks += `
-      <path d="M ${a.x} ${a.y} L ${midX} ${a.y} L ${midX} ${b.y} L ${b.x} ${b.y}"
+      <path d="M ${a.x} ${a.y} C ${cX} ${a.y}, ${cX} ${b.y}, ${b.x} ${b.y}"
             stroke="${cor}" stroke-width="2.5" fill="none" />
-      <text x="${midX}" y="${(a.y + b.y) / 2 - 6}" class="diagram-label">${l.l}m</text>
+      <text x="${(a.x + b.x) / 2}" y="${(a.y + b.y) / 2 - 6}" class="diagram-label">${l.l}m</text>
     `;
   });
 
