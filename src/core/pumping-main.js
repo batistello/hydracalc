@@ -34,7 +34,7 @@ export function calcularAdutora({ trechos, qM3s, qM3h, cotaPoco, cotaReservatori
     return {
       ...t, di: diM, v, hf: hfTrecho, hfDistribuida: hf, hfLocalizada, formulaUsada: formula,
       hfPorKm: t.l > 0 ? (hfTrecho / t.l) * 1000 : 0,
-      velocidadeCheck, celeridade, sobrepressao, qM3h
+      velocidadeCheck, celeridade, sobrepressao, qM3s, qM3h
     };
   });
 

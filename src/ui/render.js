@@ -16,23 +16,25 @@ function badge(status) {
 }
 
 export function renderResultados({ proj, limites }) {
-  const tbody = document.querySelector('#res-final tbody');
-  tbody.innerHTML = '';
-  const statusPorTrecho = {};
-
+  const tbodyAdut = document.querySelector('#res-adutora tbody');
+  tbodyAdut.innerHTML = '';
   proj.adut.trechos.forEach(a => {
     const vCheck = a.velocidadeCheck;
-    tbody.insertAdjacentHTML('beforeend', `
-      <tr class="row-adutora">
-        <td><b>[AD]</b> ${a.id}</td><td>${a.l}</td>
-        <td>${(a.qM3s * 1000).toFixed(3)}</td><td>-</td><td>${(a.qM3s * 1000).toFixed(3)}</td><td>${(a.qM3s * 1000).toFixed(3)}</td>
-        <td>${(a.di * 1000).toFixed(1)}</td>
+    tbodyAdut.insertAdjacentHTML('beforeend', `
+      <tr>
+        <td>${a.id}</td><td>${a.l}</td><td>${a.mat}</td><td>${a.pn}</td>
+        <td>${a.qM3h.toFixed(2)}</td><td>${(a.qM3s * 1000).toFixed(3)}</td>
+        <td>${a.deMm}</td><td>${(a.di * 1000).toFixed(1)}</td>
         <td>${a.v.toFixed(2)} ${badge(vCheck.status === 'ok' ? 'ok' : vCheck.status)}</td>
-        <td>${a.hf.toFixed(3)}</td><td>${a.hfPorKm.toFixed(2)}</td>
-        <td colspan="10">${a.formulaUsada} · golpe de aríete ≈ ${a.sobrepressao.toFixed(1)} mca (celeridade ${a.celeridade.toFixed(0)} m/s)</td>
+        <td>${a.hfPorKm.toFixed(2)}</td><td>${a.hf.toFixed(3)} <span class="hint">(${a.formulaUsada})</span></td>
+        <td>${a.celeridade.toFixed(0)}</td><td>${a.sobrepressao.toFixed(1)}</td>
       </tr>
     `);
   });
+
+  const tbody = document.querySelector('#res-final tbody');
+  tbody.innerHTML = '';
+  const statusPorTrecho = {};
 
   proj.links.forEach(l => {
     const vCheck = verificarVelocidade(l.v, limites.vMin, limites.vMax);
