@@ -1,0 +1,177 @@
+/* ==========================================================================
+   HydraCalc v2.0 — Identidade visual "prancha de engenharia"
+   Paleta: azul de anteprojeto (blueprint), grid milimetrado, tipografia
+   técnica (Space Grotesk para títulos, IBM Plex Sans para UI, IBM Plex Mono
+   para todo dado numérico — números de engenharia devem parecer números).
+   ========================================================================== */
+
+:root {
+  --blueprint: #0b3d6b;
+  --blueprint-deep: #082c4f;
+  --paper: #eef2f6;
+  --paper-line: #d3dee8;
+  --ink: #17222e;
+  --ink-soft: #4d5b68;
+  --accent: #0b8f8f;
+  --accent-soft: #d7f0ef;
+  --ok: #1a8c4a;
+  --ok-bg: #e3f6ea;
+  --alerta: #c23b22;
+  --alerta-bg: #fbe6e1;
+  --line-muted: #9db2c4;
+  --white: #ffffff;
+
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-body: 'IBM Plex Sans', sans-serif;
+  --font-mono: 'IBM Plex Mono', monospace;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--ink);
+  background:
+    linear-gradient(var(--paper-line) 1px, transparent 1px) 0 0 / 100% 32px,
+    linear-gradient(90deg, var(--paper-line) 1px, transparent 1px) 0 0 / 32px 100%,
+    var(--paper);
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+  width: 300px;
+  min-width: 300px;
+  background: var(--blueprint);
+  background-image: repeating-linear-gradient(0deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 32px),
+                     repeating-linear-gradient(90deg, rgba(255,255,255,0.035) 0 1px, transparent 1px 32px);
+  color: var(--white);
+  padding: 28px 24px;
+  position: fixed;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 3px 0 18px rgba(0,0,0,0.15);
+  z-index: 10;
+}
+
+.brand { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 36px; }
+.brand-mark {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-size: 0.85rem;
+  background: var(--accent);
+  color: var(--blueprint-deep);
+  padding: 6px 8px;
+  border-radius: 4px;
+  letter-spacing: 0.05em;
+}
+.brand h1 { font-family: var(--font-display); font-size: 1.3rem; margin: 0 0 2px; letter-spacing: -0.01em; }
+.brand p { font-size: 0.72rem; opacity: 0.65; margin: 0; line-height: 1.4; }
+
+.tab-nav { display: flex; flex-direction: column; gap: 8px; }
+.tab-btn {
+  font-family: var(--font-body);
+  text-align: left;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.85);
+  padding: 13px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  transition: background 0.15s, border-color 0.15s;
+}
+.tab-btn:hover { background: rgba(255,255,255,0.09); }
+.tab-btn.active { background: var(--accent); border-color: var(--accent); color: var(--white); }
+
+.sidebar-actions { margin-top: auto; padding-top: 24px; display: flex; flex-direction: column; gap: 10px; }
+.sidebar-note { font-size: 0.68rem; opacity: 0.55; line-height: 1.5; margin-top: 18px; }
+
+/* ---------- Buttons ---------- */
+.btn { font-family: var(--font-body); border: none; border-radius: 6px; padding: 13px 18px; font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: filter 0.15s, transform 0.05s; }
+.btn:active { transform: translateY(1px); }
+.btn-calc { background: var(--accent); color: var(--white); }
+.btn-calc:hover { filter: brightness(1.08); }
+.btn-pdf { background: rgba(255,255,255,0.1); color: var(--white); border: 1px solid rgba(255,255,255,0.25); }
+.btn-pdf:hover { background: rgba(255,255,255,0.16); }
+.btn-add { background: transparent; color: var(--accent); border: 1.5px dashed var(--accent); padding: 10px 16px; font-size: 0.8rem; margin-top: 6px; }
+.btn-add:hover { background: var(--accent-soft); }
+.btn-remove { background: none; border: none; color: var(--alerta); cursor: pointer; font-size: 0.95rem; padding: 4px 8px; border-radius: 4px; }
+.btn-remove:hover { background: var(--alerta-bg); }
+
+/* ---------- Main content ---------- */
+.main-content { margin-left: 300px; padding: 40px 48px; width: 100%; }
+
+.panel {
+  background: var(--white);
+  border: 1px solid var(--paper-line);
+  border-radius: 10px;
+  padding: 28px 30px;
+  margin-bottom: 28px;
+}
+.panel h2 {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  color: var(--blueprint);
+  margin: 0 0 20px;
+  padding-left: 14px;
+  border-left: 4px solid var(--accent);
+}
+.panel h3 { font-family: var(--font-display); font-size: 0.85rem; color: var(--ink-soft); margin: 0 0 10px; }
+
+.field-grid { display: grid; gap: 18px; background: var(--paper); padding: 18px; border-radius: 8px; }
+.field-grid-2 { grid-template-columns: repeat(2, 1fr); }
+.field-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.field-grid-4 { grid-template-columns: repeat(4, 1fr); }
+.field-grid label { font-size: 0.75rem; color: var(--ink-soft); font-weight: 500; display: flex; flex-direction: column; gap: 6px; }
+.field-grid label span { font-family: var(--font-mono); font-size: 0.68rem; opacity: 0.7; }
+
+input, select {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  padding: 8px 10px;
+  border: 1px solid var(--paper-line);
+  border-radius: 5px;
+  background: var(--white);
+  color: var(--ink);
+  width: 100%;
+}
+input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+.table-scroll { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+th { background: var(--blueprint); color: var(--white); padding: 9px 6px; font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 500; }
+td { border: 1px solid var(--paper-line); padding: 6px; text-align: center; font-family: var(--font-mono); }
+tr:nth-child(even) td { background: var(--paper); }
+.row-adutora td { background: var(--accent-soft) !important; }
+
+.hide { display: none !important; }
+
+/* ---------- Badges de verificação ---------- */
+.badge { display: inline-block; font-family: var(--font-body); font-size: 0.62rem; font-weight: 600; padding: 2px 6px; border-radius: 10px; background: #e5e9ed; color: var(--ink-soft); letter-spacing: 0.03em; }
+.badge-ok { background: var(--ok-bg); color: var(--ok); }
+.badge-alerta { background: var(--alerta-bg); color: var(--alerta); }
+.hint { font-family: var(--font-body); font-size: 0.65rem; color: var(--ink-soft); }
+
+/* ---------- Resultado / diagrama ---------- */
+.panel-result { border-color: var(--accent); }
+.result-summary { background: var(--paper); border-radius: 8px; padding: 16px 18px; margin-bottom: 20px; font-size: 0.85rem; font-family: var(--font-mono); }
+
+.network-diagram { background: var(--paper); border-radius: 8px; padding: 12px; }
+.diagram-empty { font-size: 0.8rem; color: var(--ink-soft); padding: 20px; text-align: center; }
+.network-diagram-svg { width: 100%; height: auto; display: block; }
+.diagram-node circle { fill: var(--white); stroke: var(--blueprint); stroke-width: 2.5; }
+.diagram-node.is-reservoir circle { fill: var(--accent); stroke: var(--blueprint-deep); }
+.diagram-node-label { font-family: var(--font-mono); font-size: 11px; fill: var(--ink); text-anchor: middle; }
+.diagram-label { font-family: var(--font-mono); font-size: 9px; fill: var(--ink-soft); text-anchor: middle; }
+
+@media (max-width: 900px) {
+  .sidebar { position: static; width: 100%; height: auto; }
+  .main-content { margin-left: 0; padding: 24px; }
+  .field-grid-3, .field-grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
