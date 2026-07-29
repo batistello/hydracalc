@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HydraCalc v2.1 — Dimensionamento de Redes de Água</title>
+  <title>HydraCalc v2.2 — Dimensionamento de Redes de Água</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -16,7 +16,7 @@
     <span class="brand-mark">H2</span>
     <div>
       <h1>HydraCalc</h1>
-      <p>v2.1 — Engenharia Hidráulica<br>Chapecó, SC</p>
+      <p>v2.2 — Engenharia Hidráulica<br>Chapecó, SC</p>
     </div>
   </div>
 
@@ -27,6 +27,21 @@
     <button class="tab-btn" data-tab-target="lig">04 · Ligação Domiciliar & Acessórios</button>
     <button class="tab-btn" data-tab-target="param">05 · Parâmetros Normativos</button>
   </nav>
+
+  <div class="sidebar-projects">
+    <p class="sidebar-label">Projetos salvos (neste navegador)</p>
+    <select id="lista-projetos"><option value="">— selecionar —</option></select>
+    <div class="sidebar-projects-actions">
+      <button type="button" class="btn-mini" id="btn-carregar-projeto">Carregar</button>
+      <button type="button" class="btn-mini" id="btn-excluir-projeto">Excluir</button>
+    </div>
+    <button type="button" class="btn btn-add" id="btn-salvar-projeto" style="width:100%;">💾 Salvar Projeto</button>
+    <div class="sidebar-projects-actions">
+      <button type="button" class="btn-mini" id="btn-exportar-projeto">Exportar .json</button>
+      <button type="button" class="btn-mini" id="btn-importar-projeto">Importar .json</button>
+    </div>
+    <input type="file" id="input-importar-projeto" accept="application/json" style="display:none;">
+  </div>
 
   <div class="sidebar-actions">
     <button class="btn btn-calc" id="btn-calcular">Calcular Projeto</button>

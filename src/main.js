@@ -15,6 +15,8 @@ import { acumularQuantitativo, consolidarQuantitativoGeral } from './core/quanti
 import { calcularLigacaoDomiciliar, verificarDisponibilidadeHidrica, vazaoContinua24h_Lh } from './core/service-connection.js';
 import { MATERIAIS } from './core/constants.js';
 import { gerarMemorialPDF } from './report/pdf-report.js';
+import { serializarProjeto, carregarProjeto } from './ui/project-io.js';
+import { listarProjetos, salvarProjeto, carregarProjetoPorNome, excluirProjeto } from './ui/project-storage.js';
 
 inicializarTabs(document);
 
@@ -207,4 +209,74 @@ document.getElementById('btn-calcular').addEventListener('click', () => {
 document.getElementById('btn-pdf').addEventListener('click', () => {
   if (!ultimoProjeto) return;
   gerarMemorialPDF({ proj: ultimoProjeto, parametros: ultimosParametros });
+});
+
+// --- Projetos salvos (localStorage do navegador) ---
+
+function atualizarListaProjetos() {
+  const select = document.getElementById('lista-projetos');
+  const projetos = listarProjetos();
+  select.innerHTML = '<option value="">— selecionar —</option>' +
+    projetos.map(p => `<option value="${p.nome}">${p.nome}</option>`).join('');
+}
+atualizarListaProjetos();
+
+document.getElementById('btn-salvar-projeto').addEventListener('click', () => {
+  const nomeSugerido = document.getElementById('proj_cliente').value || 'Projeto sem nome';
+  const nome = prompt('Nome pra salvar este projeto:', nomeSugerido);
+  if (!nome) return;
+  salvarProjeto(nome, serializarProjeto());
+  atualizarListaProjetos();
+  document.getElementById('lista-projetos').value = nome;
+  alert(`Projeto "${nome}" salvo neste navegador. Lembre-se: isso não sai deste computador/navegador — use "Exportar .json" se quiser um backup ou levar pra outro lugar.`);
+});
+
+document.getElementById('btn-carregar-projeto').addEventListener('click', () => {
+  const nome = document.getElementById('lista-projetos').value;
+  if (!nome) { alert('Selecione um projeto na lista primeiro.'); return; }
+  const dados = carregarProjetoPorNome(nome);
+  if (!dados) { alert('Projeto não encontrado.'); return; }
+  carregarProjeto(dados);
+  alert(`Projeto "${nome}" carregado. Clique em "Calcular Projeto" pra gerar os resultados.`);
+});
+
+document.getElementById('btn-excluir-projeto').addEventListener('click', () => {
+  const nome = document.getElementById('lista-projetos').value;
+  if (!nome) { alert('Selecione um projeto na lista primeiro.'); return; }
+  if (!confirm(`Excluir o projeto "${nome}" salvo neste navegador? Essa ação não pode ser desfeita.`)) return;
+  excluirProjeto(nome);
+  atualizarListaProjetos();
+});
+
+document.getElementById('btn-exportar-projeto').addEventListener('click', () => {
+  const dados = serializarProjeto();
+  const nomeArquivo = (document.getElementById('proj_cliente').value || 'projeto_hydracalc').replace(/[^a-z0-9]+/gi, '_');
+  const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${nomeArquivo}.hydracalc.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+document.getElementById('btn-importar-projeto').addEventListener('click', () => {
+  document.getElementById('input-importar-projeto').click();
+});
+
+document.getElementById('input-importar-projeto').addEventListener('change', (e) => {
+  const arquivo = e.target.files[0];
+  if (!arquivo) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const dados = JSON.parse(reader.result);
+      carregarProjeto(dados);
+      alert('Projeto importado. Clique em "Calcular Projeto" pra gerar os resultados. Use "Salvar Projeto" se quiser guardá-lo neste navegador também.');
+    } catch (err) {
+      alert('Não consegui ler esse arquivo como projeto do HydraCalc: ' + err.message);
+    }
+  };
+  reader.readAsText(arquivo);
+  e.target.value = '';
 });

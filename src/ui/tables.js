@@ -93,3 +93,18 @@ export function inicializarRemocaoLinha(container) {
     }
   });
 }
+
+/** Limpa a tabela e recria as linhas a partir de dados salvos (usado ao carregar um projeto). */
+export function preencherTabela(tbody, colunas, linhas) {
+  tbody.innerHTML = '';
+  (linhas || []).forEach(dadosLinha => {
+    adicionarLinha(tbody, colunas);
+    const novaLinha = tbody.lastElementChild;
+    colunas.forEach(col => {
+      const el = novaLinha.querySelector(`[data-field="${col.field}"]`);
+      if (el && dadosLinha[col.field] !== undefined && dadosLinha[col.field] !== null) {
+        el.value = dadosLinha[col.field];
+      }
+    });
+  });
+}

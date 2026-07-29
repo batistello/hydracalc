@@ -15,7 +15,7 @@ export function gerarMemorialPDF({ proj, parametros }) {
   doc.setFontSize(14);
   doc.text('MEMORIAL TÉCNICO DE CÁLCULO HIDRÁULICO', 14, 15);
   doc.setFontSize(9);
-  doc.text('HydraCalc v2.1 — ' + new Date().toLocaleDateString(), 14, 20);
+  doc.text('HydraCalc v2.2 — ' + new Date().toLocaleDateString(), 14, 20);
 
   const id = proj.identificacao || {};
   doc.setFontSize(8);
@@ -44,21 +44,44 @@ export function gerarMemorialPDF({ proj, parametros }) {
   doc.setFont(undefined, 'normal');
 
   const bodyAdut = proj.adut.trechos.map(a => ([
-    '[AD] ' + a.id, a.l, a.qM3h.toFixed(2), (a.qM3s * 1000).toFixed(2), (a.di * 1000).toFixed(1), a.v.toFixed(2), a.hf.toFixed(2), a.hfPorKm.toFixed(2),
-    a.formulaUsada, `${a.celeridade.toFixed(0)} m/s / ${a.sobrepressao.toFixed(1)} mca`
+    '[AD] ' + a.id, a.l, a.mat, a.pn,
+    '-', '-', (a.qM3s * 1000).toFixed(3), (a.qM3s * 1000).toFixed(3),
+    a.deMm, (a.di * 1000).toFixed(1),
+    a.v.toFixed(2), a.hfPorKm.toFixed(2), a.hf.toFixed(2),
+    '-', '-', '-', '-', '-', '-', '-', '-'
   ]));
   const bodyDist = proj.links.map(l => ([
-    l.m + '-' + l.j, l.l, (l.q_mon * 3600).toFixed(2), (l.q_mon * 1000).toFixed(2), (l.diCalculado * 1000).toFixed(1), l.v.toFixed(2), l.hf.toFixed(2), l.hfPorKm.toFixed(2),
-    l.formulaUsada, `CP ${l.cp_m.toFixed(2)} -> ${l.cp_j.toFixed(2)} / P ${l.p_m.toFixed(2)} -> ${l.p_j.toFixed(2)}`
+    l.m + '-' + l.j, l.l, l.mat, l.pn,
+    (l.q_jus * 1000).toFixed(3), (l.q_mar * 1000).toFixed(3), (l.q_mon * 1000).toFixed(3), (l.q_fic * 1000).toFixed(3),
+    l.deMm, (l.diCalculado * 1000).toFixed(1),
+    l.v.toFixed(2), l.hfPorKm.toFixed(2), l.hf.toFixed(2),
+    l.cp_m.toFixed(2), l.cp_j.toFixed(2),
+    l.cotaTerrenoM.toFixed(2), (l.cotaTerrenoJ ?? 0).toFixed(2),
+    l.p_m.toFixed(2), l.p_j.toFixed(2),
+    (l.desnivelM ?? 0).toFixed(2), (l.desnivelJ ?? 0).toFixed(2)
   ]));
 
   doc.autoTable({
     startY: 62,
-    head: [['Trecho', 'L(m)', 'Q(m³/h)', 'Q(L/s)', 'Ø int(mm)', 'V(m/s)', 'hf(m)', 'hf(m/km)', 'Fórmula', 'Observações']],
+    head: [[
+      'Trecho', 'L(m)', 'Material', 'PN',
+      'Q Jus.(L/s)', 'Q Mar.(L/s)', 'Q Mon.(L/s)', 'Q Fic.(L/s)',
+      'Ø Ext(mm)', 'Ø Int(mm)',
+      'V(m/s)', 'hf(m/km)', 'hf(m)',
+      'CP Mon.(m)', 'CP Jus.(m)',
+      'Terreno Mon.(m)', 'Terreno Jus.(m)',
+      'Pressão Mon.(mca)', 'Pressão Jus.(mca)',
+      'Desnível Mon.(m)', 'Desnível Jus.(m)'
+    ]],
     body: [...bodyAdut, ...bodyDist],
-    styles: { fontSize: 7, halign: 'center' },
-    headStyles: { fillColor: [30, 58, 138] }
+    styles: { fontSize: 5.5, halign: 'center', cellPadding: 0.8 },
+    headStyles: { fillColor: [30, 58, 138], fontSize: 5.5 },
+    columnStyles: { 0: { fontStyle: 'bold' } }
   });
+
+  doc.setFontSize(7);
+  doc.text('Fórmula de perda de carga por trecho: ' + [...proj.adut.trechos.map(a => `${a.id}=${a.formulaUsada}`), ...proj.links.map(l => `${l.m}-${l.j}=${l.formulaUsada}`)].join('; '), 14, doc.lastAutoTable.finalY + 5, { maxWidth: 270 });
+  doc.text('Golpe de aríete (adutora): ' + proj.adut.trechos.map(a => `${a.id}: celeridade ${a.celeridade.toFixed(0)} m/s, sobrepressão ${a.sobrepressao.toFixed(1)} mca`).join('; '), 14, doc.lastAutoTable.finalY + 9, { maxWidth: 270 });
 
   const bodyQuant = [
     ...Object.entries(proj.quantAdut).map(([k, v]) => ['Adutora', k, v.toFixed(1) + ' m']),
@@ -68,7 +91,7 @@ export function gerarMemorialPDF({ proj, parametros }) {
     ['TOTAL GERAL', 'Tubulação (distr. + adutora + ligação)', proj.quantitativoGeral.totalGeral.toFixed(1) + ' m']
   ];
   doc.autoTable({
-    startY: doc.lastAutoTable.finalY + 10,
+    startY: doc.lastAutoTable.finalY + 15,
     head: [['Sistema', 'Especificação do Material / Item', 'Quantidade Total']],
     body: bodyQuant,
     styles: { fontSize: 8 }
@@ -81,7 +104,7 @@ export function gerarMemorialPDF({ proj, parametros }) {
   doc.setFont(undefined, 'normal');
   const notas = [
     `- Coeficientes de consumo: K1 = ${parametros.k1} (dia de maior consumo), K2 = ${parametros.k2} (hora de maior consumo).`,
-    `- Perda de carga distribuída: Hazen-Williams (Ø >= 50mm) ou Fair-Whipple-Hsiao (Ø < 50mm), aplicada trecho a trecho — ver coluna "Fórmula".`,
+    `- Perda de carga distribuída: Hazen-Williams (Ø >= 50mm) ou Fair-Whipple-Hsiao (Ø < 50mm), aplicada trecho a trecho — ver nota "Fórmula de perda de carga por trecho" acima.`,
     `- Perdas de carga localizadas: ${parametros.percLocalizadas}% sobre a perda distribuída de cada trecho.`,
     `- Faixa de velocidade verificada: ${parametros.vMin} a ${parametros.vMax} m/s (trechos fora da faixa foram destacados na tela).`,
     `- Pressão dinâmica mínima verificada: ${parametros.pMinDinamica} mca; pressão máxima limitada pela classe (PN) de cada tubo.`,
