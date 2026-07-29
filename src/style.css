@@ -165,6 +165,9 @@ tr:nth-child(even) td { background: var(--paper); }
 .badge { display: inline-block; font-family: var(--font-body); font-size: 0.62rem; font-weight: 600; padding: 2px 6px; border-radius: 10px; background: #e5e9ed; color: var(--ink-soft); letter-spacing: 0.03em; }
 .badge-ok { background: var(--ok-bg); color: var(--ok); }
 .badge-alerta { background: var(--alerta-bg); color: var(--alerta); }
+.badge-amarelo { background: #fef3c7; color: #92610a; }
+.badge-laranja { background: #ffe4cc; color: #b9530a; }
+.badge-vermelho { background: #fee2e2; color: #b91c1c; font-weight: 700; }
 .hint { font-family: var(--font-body); font-size: 0.65rem; color: var(--ink-soft); }
 .texto-alerta { color: var(--alerta); }
 .texto-ok { color: var(--accent); }

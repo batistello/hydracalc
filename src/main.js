@@ -5,7 +5,7 @@
 import { inicializarTabs } from './ui/tabs.js';
 import {
   COLUNAS_TRECHO, COLUNAS_ADUTORA, COLUNAS_NO, COLUNAS_ACESSORIO,
-  montarCabecalho, montarLinha, adicionarLinha, lerLinhas, inicializarRemocaoLinha
+  montarCabecalho, montarLinha, adicionarLinha, lerLinhas, inicializarRemocaoLinha, preencherTabela
 } from './ui/tables.js';
 import { renderResultados } from './ui/render.js';
 import { vazaoMediaNo_m3s, vazaoDimensionamentoDistribuicao, vazaoDimensionamentoAdutora } from './core/demand.js';
@@ -26,7 +26,13 @@ document.getElementById('proj_data').value = new Date().toISOString().slice(0, 1
 // Select de material da ligação domiciliar
 document.getElementById('lig_material').innerHTML = MATERIAIS.map(m => `<option value="${m.id}" ${m.id === 'PEAD' ? 'selected' : ''}>${m.nome}</option>`).join('');
 
-// --- Monta cabeçalhos e linha inicial das tabelas dinâmicas ---
+// --- Monta cabeçalhos e linhas iniciais das tabelas dinâmicas ---
+document.querySelector('#table-nodes thead').innerHTML = `<tr>${montarCabecalho(COLUNAS_NO)}</tr>`;
+preencherTabela(document.querySelector('#table-nodes tbody'), COLUNAS_NO, [
+  { id: 'CR', cota: 100, nResidencias: 0, pressaoMin: 10 },
+  { id: 'A', cota: 95, nResidencias: 10, pressaoMin: 10 }
+]);
+
 document.querySelector('#table-links thead').innerHTML = `<tr>${montarCabecalho(COLUNAS_TRECHO)}</tr>`;
 document.querySelector('#body-dist').innerHTML = montarLinha(COLUNAS_TRECHO);
 
@@ -93,6 +99,7 @@ function processarProjeto() {
     nodes[n.id] = {
       id: n.id,
       cota: n.cota,
+      pressaoMin: n.pressaoMin,
       marcha: vazaoDimensionamentoDistribuicao(qMedia, parametros.k1, parametros.k2),
       h: 0
     };

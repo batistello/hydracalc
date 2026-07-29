@@ -6,13 +6,23 @@
 
 import { renderNetworkDiagram } from './network-diagram.js';
 import { verificarVelocidade } from '../core/pipe-hydraulics.js';
-import { verificarPressao } from '../core/pressure.js';
+import { verificarPressaoGraduada, pnParaMca } from '../core/pressure.js';
 
 function badge(status) {
   if (status === 'ok') return '<span class="badge badge-ok">OK</span>';
+  if (status === 'amarelo') return '<span class="badge badge-amarelo">BAIXA</span>';
+  if (status === 'laranja') return '<span class="badge badge-laranja">BAIXA</span>';
+  if (status === 'vermelho') return '<span class="badge badge-vermelho">CRÍTICA</span>';
   if (status === 'baixa') return '<span class="badge badge-alerta">BAIXA</span>';
   if (status === 'alta') return '<span class="badge badge-alerta">ALTA</span>';
   return '<span class="badge">-</span>';
+}
+
+/** Verificação de pressão de um ponto: alerta binário de sobrepressão (acima da PN) tem prioridade; senão, escala graduada contra a pressão mínima cadastrada no nó. */
+function checarPressaoPonto(pressaoMca, pn, pMinNo) {
+  if (pressaoMca > pnParaMca(pn)) return { status: 'alta', ok: false };
+  const grad = verificarPressaoGraduada(pressaoMca, pMinNo);
+  return { status: grad.status, ok: grad.status === 'ok', percentual: grad.percentual };
 }
 
 export function renderResultados({ proj, limites }) {
@@ -38,8 +48,10 @@ export function renderResultados({ proj, limites }) {
 
   proj.links.forEach(l => {
     const vCheck = verificarVelocidade(l.v, limites.vMin, limites.vMax);
-    const pCheckMon = verificarPressao(l.p_m, limites.pMinDinamica, l.pn);
-    const pCheckJus = verificarPressao(l.p_j, limites.pMinDinamica, l.pn);
+    const pMinMon = proj.nodes[l.m]?.pressaoMin ?? limites.pMinDinamica;
+    const pMinJus = proj.nodes[l.j]?.pressaoMin ?? limites.pMinDinamica;
+    const pCheckMon = checarPressaoPonto(l.p_m, l.pn, pMinMon);
+    const pCheckJus = checarPressaoPonto(l.p_j, l.pn, pMinJus);
     const algumAlerta = !vCheck.ok || !pCheckMon.ok || !pCheckJus.ok;
     statusPorTrecho[`${l.m}-${l.j}`] = algumAlerta ? 'alerta' : 'ok';
 

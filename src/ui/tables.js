@@ -43,7 +43,8 @@ export const COLUNAS_ADUTORA = [
 export const COLUNAS_NO = [
   { field: 'id', label: 'ID Nó', tipo: 'text', padrao: '-' },
   { field: 'cota', label: 'Cota Terreno (m)', tipo: 'number', padrao: 100 },
-  { field: 'nResidencias', label: 'Nº Residências', tipo: 'number', padrao: 0 }
+  { field: 'nResidencias', label: 'Nº Residências', tipo: 'number', padrao: 0 },
+  { field: 'pressaoMin', label: 'Pressão Mín. (mca)', tipo: 'number', padrao: 10 }
 ];
 
 export const COLUNAS_ACESSORIO = [

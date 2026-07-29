@@ -15,8 +15,22 @@
 
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
+import { verificarPressaoGraduada, pnParaMca } from '../core/pressure.js';
 
 const M = 10; // margem (mm) — respeitada em toda tabela/texto
+
+const CORES_SEVERIDADE = {
+  ok: null,
+  amarelo: { bg: [254, 243, 199], texto: [146, 97, 10] },
+  laranja: { bg: [255, 228, 204], texto: [185, 83, 10] },
+  vermelho: { bg: [254, 226, 226], texto: [185, 28, 28] },
+  alta: { bg: [251, 230, 225], texto: [194, 59, 34] }
+};
+
+function severidadePonto(pressaoMca, pn, pMinNo) {
+  if (pressaoMca > pnParaMca(pn)) return 'alta';
+  return verificarPressaoGraduada(pressaoMca, pMinNo).status;
+}
 
 export function gerarMemorialPDF({ proj, parametros }) {
   const doc = new jsPDF('l', 'mm', 'a4');
@@ -26,7 +40,7 @@ export function gerarMemorialPDF({ proj, parametros }) {
   doc.setFontSize(14);
   doc.text('MEMORIAL TÉCNICO DE CÁLCULO HIDRÁULICO', M, 15);
   doc.setFontSize(9);
-  doc.text('HydraCalc v2.5 — ' + new Date().toLocaleDateString(), M, 20);
+  doc.text('HydraCalc v2.6 — ' + new Date().toLocaleDateString(), M, 20);
 
   const id = proj.identificacao || {};
   doc.setFontSize(8);
@@ -110,6 +124,10 @@ export function gerarMemorialPDF({ proj, parametros }) {
     l.ajuste ? l.ajuste.toFixed(2) : '0.00',
     l.obs || (l.ajuste ? '(sem obs.)' : '-')
   ]));
+  const severidadesPressao = proj.links.map(l => ({
+    mon: severidadePonto(l.p_m, l.pn, proj.nodes[l.m]?.pressaoMin),
+    jus: severidadePonto(l.p_j, l.pn, proj.nodes[l.j]?.pressaoMin)
+  }));
 
   y = doc.lastAutoTable.finalY + 9;
   doc.setFontSize(9);
@@ -123,11 +141,25 @@ export function gerarMemorialPDF({ proj, parametros }) {
     body: bodyDistPressoes,
     styles: { fontSize: 6.5, halign: 'center', cellPadding: 1 },
     headStyles: { fillColor: [30, 58, 138], fontSize: 6.5 },
-    columnStyles: { 0: { fontStyle: 'bold' }, 10: { halign: 'left' } }
+    columnStyles: { 0: { fontStyle: 'bold' }, 10: { halign: 'left' } },
+    didParseCell: (data) => {
+      if (data.section !== 'body') return;
+      const sev = severidadesPressao[data.row.index];
+      if (!sev) return;
+      const status = data.column.index === 5 ? sev.mon : data.column.index === 6 ? sev.jus : null;
+      if (!status) return;
+      const cor = CORES_SEVERIDADE[status];
+      if (cor) {
+        data.cell.styles.fillColor = cor.bg;
+        data.cell.styles.textColor = cor.texto;
+        data.cell.styles.fontStyle = 'bold';
+      }
+    }
   });
 
   doc.setFontSize(7);
   doc.text('Fórmula de perda de carga por trecho (distribuição): ' + proj.links.map(l => `${l.m}-${l.j}=${l.formulaUsada}`).join('; '), M, doc.lastAutoTable.finalY + 5, { maxWidth: pageWidth - 2 * M });
+  doc.text('Legenda pressão: branco = OK (>=100% da mínima do nó) · amarelo = 70-100% · laranja = 40-70% · vermelho = <40% (crítico, avaliar ajuste) · vermelho-escuro "alta" = acima da PN do tubo.', M, doc.lastAutoTable.finalY + 9, { maxWidth: pageWidth - 2 * M });
 
   // ---------- Página 2: Quantitativo + Parâmetros/Notas + Assinatura ----------
   doc.addPage();
@@ -162,7 +194,7 @@ export function gerarMemorialPDF({ proj, parametros }) {
     `- Perda de carga distribuída: Hazen-Williams (Ø >= 50mm) ou Fair-Whipple-Hsiao (Ø < 50mm), aplicada trecho a trecho — ver nota "Fórmula de perda de carga por trecho" na página 1.`,
     `- Perdas de carga localizadas: ${parametros.percLocalizadas}% sobre a perda distribuída de cada trecho.`,
     `- Faixa de velocidade verificada: ${parametros.vMin} a ${parametros.vMax} m/s (trechos fora da faixa foram destacados na tela).`,
-    `- Pressão dinâmica mínima verificada: ${parametros.pMinDinamica} mca; pressão máxima limitada pela classe (PN) de cada tubo.`,
+    `- Pressão dinâmica mínima verificada POR NÓ (cadastrada na aba "02 · Rede de Distribuição", padrão ${parametros.pMinDinamica} mca); pressão máxima limitada pela classe (PN) de cada tubo. Ver legenda de cores na página 1.`,
     `- Golpe de aríete: celeridade de Allievi (coeficiente k tabelado por material) + sobrepressão de Joukowsky p/ fechamento instantâneo.`,
     `  Estimativa preliminar; não substitui análise transiente completa em adutoras de maior porte ou criticidade.`,
     `- Ligação domiciliar: ${proj.ligacaoDomiciliar.comprimentoPadraoM} m por economia (${proj.ligacaoDomiciliar.totalResidencias} economias).`,

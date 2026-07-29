@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HydraCalc v2.5 — Dimensionamento de Redes de Água</title>
+  <title>HydraCalc v2.6 — Dimensionamento de Redes de Água</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -16,7 +16,7 @@
     <span class="brand-mark">H2</span>
     <div>
       <h1>HydraCalc</h1>
-      <p>v2.5 — Engenharia Hidráulica<br>Chapecó, SC</p>
+      <p>v2.6 — Engenharia Hidráulica<br>Chapecó, SC</p>
     </div>
   </div>
 
@@ -79,11 +79,8 @@
     <div class="panel">
       <h2>Cadastro de Nós (Topografia)</h2>
       <table id="table-nodes">
-        <thead><tr><th>ID Nó</th><th>Cota Terreno (m)</th><th>Nº Residências</th><th>Ações</th></tr></thead>
-        <tbody>
-          <tr><td><input type="text" data-field="id" value="CR"></td><td><input type="number" data-field="cota" value="100"></td><td><input type="number" data-field="nResidencias" value="0"></td><td>—</td></tr>
-          <tr><td><input type="text" data-field="id" value="A"></td><td><input type="number" data-field="cota" value="95"></td><td><input type="number" data-field="nResidencias" value="10"></td><td><button type="button" class="btn-remove" data-action="remove-row">✕</button></td></tr>
-        </tbody>
+        <thead></thead>
+        <tbody></tbody>
       </table>
       <button type="button" class="btn btn-add" id="btn-add-node">+ Adicionar Nó</button>
     </div>
@@ -161,7 +158,7 @@
       <div class="field-grid field-grid-4">
         <label>V mínima <span>m/s</span><input type="number" id="param_v_min" value="0.6" step="0.1"></label>
         <label>V máxima <span>m/s</span><input type="number" id="param_v_max" value="3.0" step="0.1"></label>
-        <label>Pressão dinâmica mínima <span>mca</span><input type="number" id="param_p_min" value="10" step="1"></label>
+        <label>Pressão dinâmica mínima (padrão p/ novos nós) <span>mca — ajustável por nó na aba 02</span><input type="number" id="param_p_min" value="10" step="1"></label>
         <label>Perdas localizadas <span>%</span><input type="number" id="param_perc_localizadas" value="10" step="1"></label>
       </div>
     </div>
